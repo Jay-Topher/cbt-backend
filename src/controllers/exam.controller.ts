@@ -40,7 +40,7 @@ export async function getAssignedSubjects(req: Request, res: Response) {
 export async function startSubject(req: Request, res: Response) {
   const studentId = req.user!.sub;
   const { subjectId } = req.params;
-  const session = await getActiveSession(studentId) || await prisma.examSession.create({ data: { studentId } });
+  const session = await getActiveSession(studentId) ?? await prisma.examSession.create({ data: { studentId } });
   // idempotent: if attempt exists return it
   let attempt = await prisma.subjectAttempt.findUnique({ where: { sessionId_subjectId: { sessionId: session.id, subjectId } }, include: { answers: true } });
   if (attempt?.startedAt) return res.json(attempt);
@@ -132,7 +132,8 @@ export async function finishSubject(req: Request, res: Response) {
 export async function getSessionSummary(req: Request, res: Response) {
   const studentId = req.user!.sub;
   const session = await getActiveSession(studentId);
-  if (!session) return res.status(404).json({ error: "No active session" });
+  // if (!session) return res.status(404).json({ error: "No active session" }); // allow empty summary
+  if (!session) return res.json({ attempts: [], total: 0 });
   const attempts = await prisma.subjectAttempt.findMany({
     where: { sessionId: session.id },
     include: { subject: true }
