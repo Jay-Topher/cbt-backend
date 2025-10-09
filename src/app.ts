@@ -1,5 +1,5 @@
 // path: src/app.ts
-import express from "express";
+import express, { Request, Response } from "express";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
@@ -22,7 +22,7 @@ app.use(helmet());
 app.use(morgan("dev"));
 app.use(pinoHttp());
 
-app.get("/health", (_req, res) => res.json({ ok: true }));
+app.get("/health", (_req: Request, res: Response) => res.json({ ok: true }));
 
 app.use("/api/auth", rateLimit, authRoutes);
 app.use("/api/admin", rateLimit, adminRoutes);
