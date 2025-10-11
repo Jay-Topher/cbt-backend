@@ -14,10 +14,11 @@ export async function createAdmin(req: Request, res: Response) {
 }
 
 export async function createStudent(req: Request, res: Response) {
-  const { firstName, lastName, category } = req.body;
+  const { firstName, lastName, category, password } = req.body;
   const username = `${firstName}.${lastName}`.toLowerCase();
+  const hashed = await argon2.hash(password);
   const student = await prisma.student.create({
-    data: { firstName, lastName, category, username },
+    data: { firstName, lastName, category, username, password: hashed },
   });
   res.status(201).json(student);
 }
@@ -31,7 +32,7 @@ export async function deleteStudent(req: Request, res: Response) {
 export async function listStudents(req: Request, res: Response) {
   const { sortBy = "createdAt", order = "desc", category } = req.query as any;
   const where: Prisma.StudentWhereInput = category
-    ? { category: category as any }
+    ? { category: category }
     : {};
   const students = await prisma.student.findMany({
     where,
