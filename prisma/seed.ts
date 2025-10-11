@@ -12,7 +12,7 @@ const subjects = [
   { code: "PHY", name: "Physics" },
   { code: "CIV", name: "Civic Education" },
   { code: "ECO", name: "Economics" },
-  { code: "GOV", name: "Government" }
+  { code: "GOV", name: "Government" },
 ];
 
 async function main() {
@@ -20,7 +20,10 @@ async function main() {
   const admin = await prisma.adminUser.upsert({
     where: { email: "admin@cbt.local" },
     update: {},
-    create: { email: "admin@cbt.local", password: await argon2.hash("admin123") }
+    create: {
+      email: "admin@cbt.local",
+      password: await argon2.hash("admin123"),
+    },
   });
   console.log("Admin:", admin.email, "password: admin123");
 
@@ -29,14 +32,16 @@ async function main() {
     await prisma.subject.upsert({
       where: { code: s.code },
       update: { name: s.name, defaultMinutes: 25 },
-      create: { code: s.code, name: s.name, defaultMinutes: 25 }
+      create: { code: s.code, name: s.name, defaultMinutes: 25 },
     });
   }
 
   // Mock questions (5 per subject; duplicate to reach 50 in real data)
   const all = await prisma.subject.findMany();
   for (const sub of all) {
-    const existing = await prisma.question.count({ where: { subjectId: sub.id } });
+    const existing = await prisma.question.count({
+      where: { subjectId: sub.id },
+    });
     if (existing > 0) continue;
     for (let i = 1; i <= 5; i++) {
       await prisma.question.create({
@@ -44,8 +49,8 @@ async function main() {
           subjectId: sub.id,
           prompt: `${sub.name} sample question ${i}?`,
           options: ["Option A", "Option B", "Option C", "Option D"],
-          answerIndex: i % 4
-        }
+          answerIndex: i % 4,
+        },
       });
     }
     // Sandbox question
@@ -55,18 +60,30 @@ async function main() {
         prompt: `Sandbox: ${sub.name} practice question?`,
         options: ["Opt 1", "Opt 2", "Opt 3", "Opt 4"],
         answerIndex: 0,
-        isSandbox: true
-      }
+        isSandbox: true,
+      },
     });
   }
 
   // Demo students
   await prisma.student.createMany({
     data: [
-      { firstName: "Ada", lastName: "Lovelace", username: "ada.lovelace", category: Category.SCIENCE },
-      { firstName: "Chinua", lastName: "Achebe", username: "chinua.achebe", category: Category.ARTS }
+      {
+        firstName: "Ada",
+        lastName: "Lovelace",
+        username: "ada.lovelace",
+        category: Category.SCIENCE,
+        password: await argon2.hash("student123"),
+      },
+      {
+        firstName: "Chinua",
+        lastName: "Achebe",
+        username: "chinua.achebe",
+        category: Category.ARTS,
+        password: await argon2.hash("student123"),
+      },
     ],
-    skipDuplicates: true
+    skipDuplicates: true,
   });
 
   console.log("Seed completed.");

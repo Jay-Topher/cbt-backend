@@ -132,7 +132,6 @@ export async function finishSubject(req: Request, res: Response) {
 export async function getSessionSummary(req: Request, res: Response) {
   const studentId = req.user!.sub;
   const session = await getActiveSession(studentId);
-  // if (!session) return res.status(404).json({ error: "No active session" }); // allow empty summary
   if (!session) return res.json({ attempts: [], total: 0 });
   const attempts = await prisma.subjectAttempt.findMany({
     where: { sessionId: session.id },

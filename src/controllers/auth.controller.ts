@@ -20,9 +20,12 @@ export async function adminLogin(req: Request, res: Response) {
 }
 
 export async function studentLogin(req: Request, res: Response) {
-  const { username } = req.body;
+  const { username, password } = req.body;
   const student = await prisma.student.findUnique({ where: { username } });
   if (!student) return res.status(404).json({ error: "Student not found" });
+  const ok = await argon2.verify(student.password, password);
+  if (!ok) return res.status(401).json({ error: "Invalid credentials" });
   const token = sign(student.id, "STUDENT");
-  res.json({ token, user: { ...student, role: "student" } });
+  const { password: studentPassword, ...rest } = student;
+  res.json({ token, user: { ...rest, role: "student" } });
 }
