@@ -16,8 +16,8 @@ const SUBJECT_META: Record<string, { name: string }> = {
   GOV: { name: "Government" },
   CIV: { name: "Civic Education" },
   PHY: { name: "Physics" },
-  // ENG: { name: "English Language" },
-  // MTH: { name: "Mathematics" },
+  MTH: { name: "Mathematics" },
+  ENG: { name: "English Language" },
 };
 
 const prisma = new PrismaClient();
